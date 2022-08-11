@@ -1,7 +1,6 @@
 
-const CELL_SIZE = 30;
+const CELL_SIZE = 40;
 const FIELDS_COUNT = 20;
-
 
 let global_translation_x;
 let global_translation_y;
@@ -10,15 +9,42 @@ let forceField;
 
 let offset;
 
-function setup() {
-  createCanvas(600, 600);
-  forceField = new Field(FIELDS_COUNT, CELL_SIZE);
+let particle;
 
+let showFields;
+let showParticles;
+
+/* new stuff */
+
+let cellSize = 40;
+let verticesCount = 20;
+let vectorFieldType;
+let constraints;
+let vectorField;
+
+let offsetX;
+let offsetY;
+
+
+function buildVectorField() {
+    vectorFieldType = 4;
+    constraints = new Constraints(-30,30,-30,30);
+    vectorField = new VectorField(cellSize, verticesCount, constraints, vectorFieldType);
+}
+
+function setup() {
+  
+  let canvas = createCanvas(cellSize * verticesCount, cellSize * verticesCount);
+  canvas.parent('canvas_container');
+  
+  offsetX = createSlider(-10, 10, 0);
+  offsetY = createSlider(-10, 10, 0);
+  
+  buildVectorField();
 }
 
 
 function drawGizmos() {
-
   strokeWeight(0.2);
   stroke(255);
   line(0, height/2, width+(CELL_SIZE*FIELDS_COUNT)/2, height/2);
@@ -26,17 +52,31 @@ function drawGizmos() {
 }
 
 function draw() {
-  background(0);
-  frameRate(50);
-  
+  background(0, 20);
+  frameRate(60);
+
   push();
   translate(width/2 - (CELL_SIZE*FIELDS_COUNT)/2, height/2 - (CELL_SIZE*FIELDS_COUNT)/2);
+  vectorField.update();
+  vectorField.updatePos(offsetX.value(),offsetY.value());
+ /* if (showFields.checked()) {
+    forceField.drawFields();
+  }
+  forceField.updateDeltas();
 
-  forceField.drawFields();
+  if (showParticles.checked()) {
+    for (let i = 0; i < particles.length; i++) {
+      particles[i].applyForceByFields(forceField.fieldPoints);
+      particles[i].update();
+      particles[i].drawParticle();
+    }
+  }
+
+*/
   pop();
-  
-  drawGizmos();
 
+
+//    drawGizmos();
 }
 
 /*function mouseMoved(event) {
@@ -51,7 +91,3 @@ function draw() {
  }
  }
  }*/
-
-function mouseScreenToWorld() {
-  return createVector(mouseX/GLOBAL_SCALE - global_translation_x/2, mouseY/GLOBAL_SCALE  - global_translation_y/2);
-}

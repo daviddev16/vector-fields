@@ -1,26 +1,48 @@
 class Particle {
 
-  constructor(initX, initY) {
-    this.posX = initX;
-    this.posY = initY;
-    this.directionX = 0;
-    this.directionY = 0;
-    this.accelerationX = 1;
-    this.accelerationY = 1;
+  constructor() {
+    this.position = createVector(CELL_SIZE + random(width), CELL_SIZE + random(height));
+    this.velocity = createVector(0, 0);
+    this.acceleration = createVector(0, 0);
+    this.maxSpeed = 1;
   }
 
-  simulate() {
-    this.posX = this.accelerationX * this.directionX;
-    this.posX = this.accelerationY * this.directionY;
+  update() {
+    this.velocity.add(this.acceleration);
+    this.velocity.limit(this.maxSpeed);
+    this.position.add(this.velocity);
+    this.acceleration.mult(0);
+    
+    if(this.position.x < 0 || this.position.x > width || this.position.y < 0 || this.position.y > height){
+     this.position = createVector(random(width), random(height)); 
+    }
   }
 
-  changeDirection(dirX, dirY) {
-    this.directionX = dirX;
-    this.directionY = dirY;
+  applyForce(force) {
+    this.acceleration.add(force);
+  }
+
+  applyForceByFields(fieldPoints) {
+    var x = floor(this.position.x / CELL_SIZE);
+    var y = floor(this.position.y / CELL_SIZE);
+
+    if (x < 0 || y < 0 || x > CELL_SIZE*FIELDS_COUNT-1 || y > CELL_SIZE*FIELDS_COUNT-1) {
+      return;
+    }
+
+    if (fieldPoints[x] == null ||  fieldPoints[x][y] == null) {
+      return;
+    }
+
+    var fieldPoint = fieldPoints[x][y];
+
+    var force = createVector(-fieldPoint.dx, -fieldPoint.dy);
+    this.applyForce(force);
   }
 
   drawParticle() {
-    fill(255, 255, 0);
-    circle(this.posX, this.posY, 2);
+    stroke(255);
+    strokeWeight(0.2);
+    circle(this.position.x, this.position.y, 1);
   }
 }
